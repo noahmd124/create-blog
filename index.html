@@ -2,31 +2,139 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin - Create Post</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
+    label { display: block; margin-top: 1rem; }
+    input, textarea { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; }
+    #logoutBtn { margin-top: 1rem; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Client Login</h2>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <p id="error"></p>
+  <h1>Create Blog Post</h1>
+
+  <div id="auth-section">
+    <div id="login-form">
+      <h2>Login</h2>
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button id="loginBtn">Log In</button>
+      <p id="loginError" style="color:red;"></p>
+    </div>
+
+    <div id="post-form-section" style="display:none;">
+      <form id="post-form">
+        <label>Title<input type="text" id="title" required /></label>
+        <label>Content<textarea id="content" rows="6" required></textarea></label>
+        <label>Author<input type="text" id="author" required /></label>
+        <label>Image (optional)<input type="file" id="image" accept="image/*" /></label>
+        <button type="submit">Publish Post</button>
+      </form>
+      <button id="logoutBtn">Log Out</button>
+      <p id="status" style="color:green;"></p>
+    </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js"></script>
-  <script src="firebase-config.js"></script>
-  <script>
-    const auth = firebase.auth();
-    function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => window.location.href = 'dashboard.html')
-        .catch(err => document.getElementById('error').innerText = err.message);
-    }
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAHpKaDMVV7wrhKQYQUIC5Bj_awgwZgfqw",
+      authDomain: "davidblog-1f7ea.firebaseapp.com",
+      projectId: "davidblog-1f7ea",
+      storageBucket: "davidblog-1f7ea.firebasestorage.app",
+      messagingSenderId: "349756213856",
+      appId: "1:349756213856:web:0607caf8b784ac7337d105",
+      measurementId: "G-X52H4JJGTG"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const loginForm = document.getElementById("login-form");
+    const postFormSection = document.getElementById("post-form-section");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loginError = document.getElementById("loginError");
+    const status = document.getElementById("status");
+    const postForm = document.getElementById("post-form");
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        loginForm.style.display = "none";
+        postFormSection.style.display = "block";
+        document.getElementById("author").value = user.email; // autofill author as email
+      } else {
+        loginForm.style.display = "block";
+        postFormSection.style.display = "none";
+      }
+    });
+
+    loginBtn.onclick = async () => {
+      loginError.textContent = "";
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        loginError.textContent = "Login failed: " + err.message;
+      }
+    };
+
+    logoutBtn.onclick = () => {
+      signOut(auth);
+      status.textContent = "";
+      postForm.reset();
+    };
+
+    postForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      status.textContent = "";
+
+      const title = document.getElementById("title").value.trim();
+      const content = document.getElementById("content").value.trim();
+      const author = document.getElementById("author").value.trim();
+      const imageFile = document.getElementById("image").files[0];
+
+      if (!title || !content || !author) {
+        alert("Please fill all required fields");
+        return;
+      }
+
+      let imageUrl = "";
+
+      if (imageFile) {
+        const storageRef = ref(storage, "post_images/" + Date.now() + "_" + imageFile.name);
+        try {
+          const snapshot = await uploadBytes(storageRef, imageFile);
+          imageUrl = await getDownloadURL(snapshot.ref);
+        } catch (err) {
+          alert("Image upload failed: " + err.message);
+          return;
+        }
+      }
+
+      try {
+        await addDoc(collection(db, "posts"), {
+          title,
+          content,
+          author,
+          imageUrl,
+          date: serverTimestamp()
+        });
+        status.textContent = "Post published!";
+        postForm.reset();
+      } catch (err) {
+        alert("Failed to publish post: " + err.message);
+      }
+    });
   </script>
 </body>
 </html>
