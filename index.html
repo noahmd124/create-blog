@@ -1,41 +1,212 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin - Create Post</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
-    label { display: block; margin-top: 1rem; }
-    input, textarea { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
-    button { margin-top: 1rem; padding: 0.5rem 1rem; }
-    #logoutBtn { margin-top: 1rem; }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      color: #333;
+    }
+    main {
+      background: white;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 12px;
+      padding: 2.5rem 3rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    h1 {
+      font-weight: 600;
+      font-size: 2rem;
+      color: #1a73e8;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    /* Login form */
+    #login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    #login-form input {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1.8px solid #ccc;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+    }
+    #login-form input:focus {
+      border-color: #1a73e8;
+      outline: none;
+      box-shadow: 0 0 5px rgba(26, 115, 232, 0.5);
+    }
+    #loginBtn {
+      background: #1a73e8;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #loginBtn:hover {
+      background: #155ab6;
+    }
+    #loginError {
+      color: #e03e3e;
+      font-weight: 600;
+      text-align: center;
+      min-height: 1.2rem;
+    }
+
+    /* Post form section */
+    #post-form-section {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    form#post-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    label {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #444;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    input[type="text"],
+    input[type="file"],
+    textarea {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1.8px solid #ccc;
+      border-radius: 8px;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus,
+    textarea:focus,
+    input[type="file"]:focus {
+      border-color: #1a73e8;
+      outline: none;
+      box-shadow: 0 0 5px rgba(26, 115, 232, 0.5);
+    }
+
+    button[type="submit"] {
+      width: fit-content;
+      background: #1a73e8;
+      color: white;
+      font-weight: 700;
+      border: none;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      align-self: flex-start;
+      transition: background-color 0.3s ease;
+    }
+    button[type="submit"]:hover {
+      background: #155ab6;
+    }
+
+    #logoutBtn {
+      background: #e03e3e;
+      color: white;
+      font-weight: 700;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      font-size: 0.95rem;
+      border-radius: 10px;
+      cursor: pointer;
+      align-self: flex-start;
+      margin-top: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    #logoutBtn:hover {
+      background: #b33434;
+    }
+
+    #status {
+      font-weight: 600;
+      color: #2a7a2a;
+      margin-top: 0.5rem;
+      min-height: 1.2rem;
+      font-size: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 400px) {
+      main {
+        padding: 1.5rem 1.5rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      button[type="submit"],
+      #logoutBtn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Create Blog Post</h1>
+  <main>
+    <h1>Create Blog Post</h1>
 
-  <div id="auth-section">
-    <div id="login-form">
-      <h2>Login</h2>
-      <input type="email" id="email" placeholder="Email" />
-      <input type="password" id="password" placeholder="Password" />
-      <button id="loginBtn">Log In</button>
-      <p id="loginError" style="color:red;"></p>
-    </div>
+    <div id="auth-section">
+      <div id="login-form">
+        <input type="email" id="email" placeholder="Email" autocomplete="username" />
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+        <button id="loginBtn">Log In</button>
+        <p id="loginError"></p>
+      </div>
 
-    <div id="post-form-section" style="display:none;">
-      <form id="post-form">
-        <label>Title<input type="text" id="title" required /></label>
-        <label>Content<textarea id="content" rows="6" required></textarea></label>
-        <label>Author<input type="text" id="author" required /></label>
-        <label>Image (optional)<input type="file" id="image" accept="image/*" /></label>
-        <button type="submit">Publish Post</button>
-      </form>
-      <button id="logoutBtn">Log Out</button>
-      <p id="status" style="color:green;"></p>
+      <div id="post-form-section">
+        <form id="post-form" autocomplete="off">
+          <label for="title">Title
+            <input type="text" id="title" required />
+          </label>
+          <label for="content">Content
+            <textarea id="content" rows="6" required></textarea>
+          </label>
+          <label for="author">Author
+            <input type="text" id="author" required readonly />
+          </label>
+          <label for="image">Image (optional)
+            <input type="file" id="image" accept="image/*" />
+          </label>
+          <button type="submit">Publish Post</button>
+        </form>
+        <button id="logoutBtn">Log Out</button>
+        <p id="status"></p>
+      </div>
     </div>
-  </div>
+  </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -69,18 +240,21 @@
     onAuthStateChanged(auth, user => {
       if (user) {
         loginForm.style.display = "none";
-        postFormSection.style.display = "block";
+        postFormSection.style.display = "flex";
         document.getElementById("author").value = user.email; // autofill author as email
       } else {
-        loginForm.style.display = "block";
+        loginForm.style.display = "flex";
         postFormSection.style.display = "none";
+        loginError.textContent = "";
+        status.textContent = "";
+        postForm.reset();
       }
     });
 
     loginBtn.onclick = async () => {
       loginError.textContent = "";
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
@@ -90,8 +264,6 @@
 
     logoutBtn.onclick = () => {
       signOut(auth);
-      status.textContent = "";
-      postForm.reset();
     };
 
     postForm.addEventListener("submit", async e => {
